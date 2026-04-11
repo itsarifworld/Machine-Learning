@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PCA — Masterclass Notes | Day 47</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e0e10;
+  --bg2: #161618;
+  --bg3: #1e1e22;
+  --bg4: #26262c;
+  --surface: #1c1c20;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --text: #f0efe8;
+  --text2: #a09e98;
+  --text3: #66645e;
+  --accent: #c8a96e;
+  --accent2: #e8c98e;
+  --accent-soft: rgba(200,169,110,0.12);
+  --accent-border: rgba(200,169,110,0.3);
+  --purple: #9f8fff;
+  --purple-soft: rgba(159,143,255,0.12);
+  --purple-border: rgba(159,143,255,0.3);
+  --teal: #5ecfb0;
+  --teal-soft: rgba(94,207,176,0.1);
+  --teal-border: rgba(94,207,176,0.3);
+  --coral: #f08060;
+  --coral-soft: rgba(240,128,96,0.1);
+  --coral-border: rgba(240,128,96,0.3);
+  --red: #e06060;
+  --red-soft: rgba(224,96,96,0.1);
+  --green: #7ec87e;
+  --green-soft: rgba(126,200,126,0.1);
+  --font-serif: 'Instrument Serif', Georgia, serif;
+  --font-sans: 'DM Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --r: 10px;
+  --r-lg: 14px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-weight: 300;
+  line-height: 1.7;
+  padding: 2rem 1rem 5rem;
+}
+
+.wrap { max-width: 900px; margin: 0 auto; }
+
+/* ── HEADER ── */
+.header {
+  border-bottom: 1px solid var(--border2);
+  padding-bottom: 2.5rem;
+  margin-bottom: 3rem;
+}
+.eyebrow {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.eyebrow::before {
+  content: '';
+  display: block;
+  width: 24px; height: 1px;
+  background: var(--accent);
+}
+h1.title {
+  font-family: var(--font-serif);
+  font-size: clamp(42px, 7vw, 68px);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 0.75rem;
+}
+h1.title em {
+  font-style: italic;
+  color: var(--accent2);
+}
+.subtitle {
+  font-size: 16px;
+  color: var(--text2);
+  max-width: 560px;
+  line-height: 1.65;
+}
+.tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 1.5rem; }
+.tag {
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 4px 12px; border-radius: 20px;
+  border: 1px solid var(--border2);
+  color: var(--text2);
+}
+.tag.gold { border-color: var(--accent-border); color: var(--accent); background: var(--accent-soft); }
+.tag.purple { border-color: var(--purple-border); color: var(--purple); background: var(--purple-soft); }
+.tag.teal { border-color: var(--teal-border); color: var(--teal); background: var(--teal-soft); }
+
+/* ── SECTION ── */
+.section { margin-bottom: 3.5rem; }
+.sec-label {
+  display: flex; align-items: center; gap: 12px;
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 1.5rem;
+}
+.sec-label::after {
+  content: ''; flex: 1; height: 1px;
+  background: var(--border);
+}
+.sec-num {
+  width: 22px; height: 22px;
+  border: 1px solid var(--border2);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; color: var(--text3);
+  flex-shrink: 0;
+}
+
+h2 {
+  font-family: var(--font-serif);
+  font-size: 28px; font-weight: 400;
+  color: var(--text);
+  margin-bottom: 1rem;
+  line-height: 1.25;
+}
+h3 {
+  font-size: 14px; font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.01em;
+}
+p { font-size: 15px; color: var(--text2); line-height: 1.75; margin-bottom: 0.75rem; }
+p:last-child { margin-bottom: 0; }
+strong { font-weight: 600; color: var(--text); }
+
+/* ── CALLOUT BOXES ── */
+.callout {
+  border-radius: var(--r-lg);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1rem;
+  border-left: 3px solid;
+}
+.callout.gold { background: var(--accent-soft); border-color: var(--accent); }
+.callout.gold .callout-label { color: var(--accent); }
+.callout.purple { background: var(--purple-soft); border-color: var(--purple); }
+.callout.purple .callout-label { color: var(--purple); }
+.callout.teal { background: var(--teal-soft); border-color: var(--teal); }
+.callout.teal .callout-label { color: var(--teal); }
+.callout.coral { background: var(--coral-soft); border-color: var(--coral); }
+.callout.coral .callout-label { color: var(--coral); }
+.callout.red { background: var(--red-soft); border-color: var(--red); }
+.callout.red .callout-label { color: var(--red); }
+.callout.green { background: var(--green-soft); border-color: var(--green); }
+.callout.green .callout-label { color: var(--green); }
+.callout-label {
+  font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  margin-bottom: 0.5rem;
+}
+.callout p { margin-bottom: 0; font-size: 14px; line-height: 1.7; }
+.callout p strong { color: inherit; }
+
+/* ── CARDS GRID ── */
+.grid { display: grid; gap: 12px; }
+.grid.g2 { grid-template-columns: 1fr 1fr; }
+.grid.g3 { grid-template-columns: 1fr 1fr 1fr; }
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 1.1rem 1.25rem;
+}
+.card h3 { font-size: 13px; }
+.card p { font-size: 13px; }
+.card-icon {
+  font-size: 20px; margin-bottom: 8px;
+  display: block;
+}
+
+/* ── STEP LIST ── */
+.steps { display: flex; flex-direction: column; gap: 0; }
+.step {
+  display: flex;
+  gap: 0;
+  position: relative;
+}
+.step-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 48px;
+  flex-shrink: 0;
+}
+.step-circle {
+  width: 36px; height: 36px;
+  background: var(--bg3);
+  border: 1px solid var(--accent-border);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 600;
+  color: var(--accent);
+  flex-shrink: 0;
+  z-index: 1;
+}
+.step-line {
+  width: 1px;
+  background: var(--border);
+  flex: 1;
+  margin: 4px 0;
+  min-height: 20px;
+}
+.step:last-child .step-line { display: none; }
+.step-body {
+  flex: 1;
+  padding-bottom: 2rem;
+  padding-left: 16px;
+  padding-top: 5px;
+}
+.step-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.step-desc { font-size: 14px; color: var(--text2); line-height: 1.7; }
+.step-desc strong { color: var(--text); }
+
+/* ── FORMULA ── */
+.formula {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  padding: 10px 16px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--purple);
+  margin: 10px 0;
+  display: block;
+  letter-spacing: 0.01em;
+}
+.formula .comment { color: var(--text3); }
+
+/* ── CODE BLOCK ── */
+.code {
+  background: #0a0a0c;
+  border: 1px solid var(--border2);
+  border-radius: var(--r-lg);
+  padding: 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.9;
+  overflow-x: auto;
+  white-space: pre;
+}
+.kw { color: #c792ea; }
+.fn { color: #82aaff; }
+.st { color: #c3e88d; }
+.cm { color: #546e7a; }
+.nb { color: #f78c6c; }
+.op { color: var(--text2); }
+
+/* ── TABLE ── */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin: 1rem 0;
+}
+th {
+  text-align: left;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text3);
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border2);
+}
+td {
+  padding: 10px 14px;
+  color: var(--text2);
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  line-height: 1.6;
+}
+td strong { color: var(--text); font-weight: 500; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--bg2); }
+
+/* ── ANALOGY BLOCK ── */
+.analogy {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-lg);
+  padding: 1.5rem;
+  display: flex; gap: 1.25rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+.analogy-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.analogy-text h3 { font-size: 14px; color: var(--accent2); margin-bottom: 4px; }
+.analogy-text p { font-size: 14px; color: var(--text2); margin: 0; }
+
+/* ── VISUAL DIAGRAM ── */
+.diagram {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 1.5rem;
+  margin: 1rem 0;
+  overflow: hidden;
+}
+.diagram svg { width: 100%; display: block; }
+
+/* ── PROS/CONS ── */
+.procon { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.pro-item {
+  display: flex; gap: 10px;
+  background: var(--green-soft);
+  border: 1px solid rgba(126,200,126,0.2);
+  border-radius: var(--r);
+  padding: 10px 14px;
+  font-size: 13px; color: #9ed89e;
+  line-height: 1.5;
+  align-items: flex-start;
+}
+.con-item {
+  display: flex; gap: 10px;
+  background: var(--red-soft);
+  border: 1px solid rgba(224,96,96,0.2);
+  border-radius: var(--r);
+  padding: 10px 14px;
+  font-size: 13px; color: #e89898;
+  line-height: 1.5;
+  align-items: flex-start;
+}
+.pro-icon, .con-icon { flex-shrink: 0; font-weight: 700; font-size: 14px; }
+.pro-icon { color: var(--green); }
+.con-icon { color: var(--red); }
+
+/* ── REMEMBER BOX ── */
+.remember {
+  background: linear-gradient(135deg, rgba(200,169,110,0.08) 0%, rgba(159,143,255,0.06) 100%);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--r-lg);
+  padding: 1.5rem;
+  margin-top: 1rem;
+}
+.remember h3 {
+  color: var(--accent2);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 1rem;
+}
+.remember ul { list-style: none; }
+.remember ul li {
+  font-size: 14px; color: var(--text2);
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+  display: flex; gap: 10px;
+  line-height: 1.6;
+}
+.remember ul li:last-child { border-bottom: none; }
+.remember ul li::before {
+  content: '◈';
+  color: var(--accent);
+  flex-shrink: 0;
+  font-size: 12px;
+  margin-top: 3px;
+}
+.remember ul li strong { color: var(--text); }
+
+/* ── COMPARISON ── */
+.compare-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.compare-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 1.1rem 1.25rem;
+}
+.compare-card .compare-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.compare-card ul {
+  list-style: none;
+  font-size: 13px;
+  color: var(--text2);
+}
+.compare-card ul li { padding: 4px 0; line-height: 1.55; }
+.compare-card ul li::before { content: '→  '; color: var(--text3); }
+
+/* ── PILL CHIPS ── */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 0.75rem; }
+.chip {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 5px 13px;
+  font-size: 12px;
+  color: var(--text2);
+}
+
+/* ── MATH SECTION ── */
+.math-block {
+  background: var(--bg3);
+  border-radius: var(--r-lg);
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border);
+}
+.math-block h3 { color: var(--purple); font-size: 13px; margin-bottom: 10px; }
+.math-block p { font-size: 13px; }
+
+/* ── CHEAT SHEET ── */
+.cheat {
+  background: var(--bg2);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+.cheat-header {
+  background: var(--accent-soft);
+  border-bottom: 1px solid var(--accent-border);
+  padding: 0.75rem 1.25rem;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+}
+.cheat-body { padding: 1.25rem; }
+
+/* ── DIVIDER ── */
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2.5rem 0;
+}
+
+/* ── INLINE BADGE ── */
+.badge {
+  display: inline-flex; align-items: center;
+  background: var(--purple-soft);
+  border: 1px solid var(--purple-border);
+  border-radius: 4px;
+  padding: 1px 7px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--purple);
+  font-family: var(--font-mono);
+  vertical-align: middle;
+}
+
+/* ── SCROLLABLE TABLE ── */
+.table-wrap { overflow-x: auto; }
+
+/* ── FOOTER ── */
+.footer {
+  text-align: center;
+  padding-top: 3rem;
+  font-size: 12px;
+  color: var(--text3);
+  letter-spacing: 0.05em;
+}
+
+@media (max-width: 640px) {
+  .grid.g2, .grid.g3, .procon, .compare-row { grid-template-columns: 1fr; }
+  h1.title { font-size: 38px; }
+}
+@media print {
+  body { background: white; color: #111; padding: 1rem; }
+  :root {
+    --bg: white; --bg2: #f8f8f8; --bg3: #f0f0f0; --bg4: #e8e8e8;
+    --border: #ddd; --border2: #ccc;
+    --text: #111; --text2: #444; --text3: #888;
+    --accent: #7a5c20; --accent2: #8a6c30;
+    --purple: #5040b0; --teal: #1a7060; --coral: #a04020;
+  }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ══════════════════════════════════════════
+     HEADER
+══════════════════════════════════════════ -->
+<div class="header">
+  <div class="eyebrow">CampusX · 100 Days of ML · Day 47</div>
+  <h1 class="title">Principal<br><em>Component Analysis</em></h1>
+  <p class="subtitle">A complete study guide — from raw intuition to math to sklearn — so you never need to look this up again.</p>
+  <div class="tags">
+    <span class="tag gold">Dimensionality Reduction</span>
+    <span class="tag purple">Unsupervised</span>
+    <span class="tag teal">Linear Algebra</span>
+    <span class="tag">Feature Engineering</span>
+    <span class="tag">Pre-processing</span>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     SECTION 1 — THE BIG PICTURE
+══════════════════════════════════════════ -->
+<div class="section">
+  <div class="sec-label"><div class="sec-num">01</div> The Big Picture</div>
+  <h2>What problem does PCA solve?</h2>
+
+  <p>Real-world datasets are <strong>high-dimensional</strong> — hundreds or thousands of features. The more features you have, the harder everything becomes: models train slower, visualisation is impossible, and performance degrades due to the <strong>curse of dimensionality</strong>.</p>
+
+  <p>PCA answers the question: <strong>"Can I represent this data with fewer numbers while keeping the essential story intact?"</strong></p>
+
+  <div class="callout gold">
+    <div class="callout-label">Core Definition</div>
+    <p>PCA is an <strong>unsupervised, linear dimensionality reduction</strong> technique that transforms the original features into a new set of <strong>uncorrelated axes</strong> (called principal components) ranked by the amount of variance they capture — most to least.</p>
+  </div>
+
+  <div class="callout teal">
+    <div class="callout-label">Key Insight</div>
+    <p>PCA doesn't <em>select</em> existing features. It <strong>creates entirely new features</strong> that are linear combinations of the originals. You trade interpretability for compression.</p>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     SECTION 2 — INTUITION & ANALOGIES
+══════════════════════════════════════════ -->
+<div class="section">
+  <div class="sec-label"><div class="sec-num">02</div> Intuition — Build It Visually</div>
+  <h2>Three ways to understand PCA</h2>
+
+  <div class="analogy">
+    <div class="analogy-icon">📷</div>
+    <div class="analogy-text">
+      <h3>The Photographer Analogy</h3>
+      <p>A photographer wants to capture a 3D object (your data) in a 2D photo (reduced dimensions). They walk around looking for <strong>the angle that reveals the most structure</strong> — the side showing the most shape variation. That "best angle" is PC1. The second-best angle (perpendicular to the first) is PC2. PCA finds these angles mathematically.</p>
+    </div>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-icon">☁️</div>
+    <div class="analogy-text">
+      <h3>The Cloud of Points</h3>
+      <p>Imagine data as a cloud of stars in space. God shines a flashlight on the cloud and casts a shadow on a flat surface. The goal: find the rotation of that flat surface that gives <strong>the most spread-out shadow</strong>. Maximum spread = maximum variance = maximum information retained. PCA finds that optimal rotation.</p>
+    </div>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-icon">🏗️</div>
+    <div class="analogy-text">
+      <h3>The Room Analogy (CampusX)</h3>
+      <p>You have features: <em>room size</em> and <em>washroom size</em>. These are correlated (bigger house → bigger both). PCA finds a new axis <em>room'</em> along the direction of maximum spread — this captures the "overall house size" concept. The second axis <em>washroom'</em> (perpendicular) captures the remaining tiny variation. You can drop <em>washroom'</em> safely.</p>
+    </div>
+  </div>
+
+  <!-- SVG Diagram: 2D to 1D PCA illustration -->
+  <div class="diagram">
+    <svg viewBox="0 0 760 260" xmlns="http://www.w3.org/2000/svg" font-family="DM Sans, sans-serif">
+      <!-- Left: original 2D data -->
+      <text x="180" y="22" text-anchor="middle" font-size="12" fill="#a09e98" letter-spacing="1">ORIGINAL 2D DATA</text>
+      <!-- axes -->
+      <line x1="40" y1="230" x2="40" y2="30" stroke="#333" stroke-width="1"/>
+      <line x1="40" y1="230" x2="320" y2="230" stroke="#333" stroke-width="1"/>
+      <text x="34" y="25" font-size="10" fill="#546e7a">x₂</text>
+      <text x="325" y="234" font-size="10" fill="#546e7a">x₁</text>
+      <!-- correlated scatter -->
+      <g opacity="0.7">
+        <circle cx="70" cy="200" r="4" fill="#5ecfb0"/>
+        <circle cx="85" cy="190" r="4" fill="#5ecfb0"/>
+        <circle cx="100" cy="185" r="4" fill="#5ecfb0"/>
+        <circle cx="115" cy="175" r="4" fill="#5ecfb0"/>
+        <circle cx="120" cy="168" r="4" fill="#5ecfb0"/>
+        <circle cx="135" cy="162" r="4" fill="#5ecfb0"/>
+        <circle cx="145" cy="158" r="4" fill="#5ecfb0"/>
+        <circle cx="155" cy="150" r="4" fill="#5ecfb0"/>
+        <circle cx="170" cy="145" r="4" fill="#5ecfb0"/>
+        <circle cx="180" cy="138" r="4" fill="#5ecfb0"/>
+        <circle cx="195" cy="132" r="4" fill="#5ecfb0"/>
+        <circle cx="205" cy="125" r="4" fill="#5ecfb0"/>
+        <circle cx="215" cy="120" r="4" fill="#5ecfb0"/>
+        <circle cx="230" cy="115" r="4" fill="#5ecfb0"/>
+        <circle cx="245" cy="108" r="4" fill="#5ecfb0"/>
+        <circle cx="260" cy="100" r="4" fill="#5ecfb0"/>
+        <circle cx="275" cy="95" r="4" fill="#5ecfb0"/>
+        <!-- noise -->
+        <circle cx="90" cy="180" r="4" fill="#9f8fff" opacity="0.6"/>
+        <circle cx="150" cy="145" r="4" fill="#9f8fff" opacity="0.6"/>
+        <circle cx="200" cy="140" r="4" fill="#9f8fff" opacity="0.6"/>
+        <circle cx="250" cy="102" r="4" fill="#9f8fff" opacity="0.6"/>
+      </g>
+      <!-- PC1 arrow -->
+      <line x1="60" y1="215" x2="290" y2="85" stroke="#c8a96e" stroke-width="2.5" stroke-dasharray="0"/>
+      <polygon points="290,85 278,92 284,80" fill="#c8a96e"/>
+      <text x="285" y="74" font-size="12" fill="#c8a96e" font-weight="500">PC1</text>
+      <!-- PC2 arrow (perpendicular, shorter) -->
+      <line x1="175" y1="150" x2="155" y2="120" stroke="#f08060" stroke-width="1.5"/>
+      <polygon points="155,120 162,133 148,130" fill="#f08060"/>
+      <text x="133" y="117" font-size="11" fill="#f08060">PC2</text>
+
+      <!-- Arrow -->
+      <text x="355" y="138" font-size="28" fill="#444" text-anchor="middle">→</text>
+      <text x="355" y="158" font-size="10" fill="#546e7a" text-anchor="middle">reduce to 1D</text>
+
+      <!-- Right: projected onto PC1 -->
+      <text x="560" y="22" text-anchor="middle" font-size="12" fill="#a09e98" letter-spacing="1">PROJECTED 1D DATA</text>
+      <line x1="400" y1="155" x2="720" y2="155" stroke="#c8a96e" stroke-width="2"/>
+      <text x="722" y="159" font-size="10" fill="#c8a96e">PC1</text>
+      <g>
+        <circle cx="415" cy="155" r="4" fill="#5ecfb0" opacity="0.7"/>
+        <circle cx="435" cy="155" r="4" fill="#5ecfb0" opacity="0.7"/>
+        <circle cx="455" cy="155" r="4" fill="#5ecfb0" opacity="0.7"/>
+        <circle cx="475" cy="155" r="4" fill="#5ecfb0" opacity="0.7"/>
+        <circle cx="490" cy="155" r="4" fill="#9f8fff" opacity="0.6"/>
+        <circle cx="510" cy="155" r="4" fill="#5ecfb0" opacity="0.7"/>
+        <circle cx="530" cy="155" r="4" fill="#5ecfb0" opacity="0.7"/>
+        <circle cx="545" cy="155" r="4" fill="#9f8fff" opacity="0.6"/>
+        <circle cx="565" cy="155" r="4" fill="#5ecfb0" opacity="0.7"/>
+        <circle cx="585" cy="155" r="4" fill="#5ecfb0" opacity="0.7"/>
+        <circle cx="605" cy="155" r="4" fill="#9f8fff" opacity="0.6"/>
+        <circle cx="625" cy="155" r="4" fill="#5ecfb0" opacity="0.7"/>
+        <circle cx="645" cy="155" r="4" fill="#5ecfb0" opacity="0.7"/>
+        <circle cx="665" cy="155" r="4" fill="#9f8fff" opacity="0.6"/>
+        <circle cx="685" cy="155" r="4" fill="#5ecfb0" opacity="0.7"/>
+        <circle cx="705" cy="155" r="4" fill="#5ecfb0" opacity="0.7"/>
+      </g>
+      <!-- drop lines (projection) -->
+      <line x1="415" y1="200" x2="415" y2="160" stroke="#444" stroke-width="0.8" stroke-dasharray="3,3"/>
+      <line x1="510" y1="175" x2="510" y2="160" stroke="#444" stroke-width="0.8" stroke-dasharray="3,3"/>
+      <line x1="605" y1="180" x2="605" y2="160" stroke="#444" stroke-width="0.8" stroke-dasharray="3,3"/>
+      <text x="560" y="205" text-anchor="middle" font-size="12" fill="#a09e98">Maximum variance preserved</text>
+      <text x="560" y="220" text-anchor="middle" font-size="11" fill="#546e7a">Minimum reconstruction error</text>
+    </svg>
+  </div>
+
+  <div class="callout purple">
+    <div class="callout-label">The Core Duality</div>
+    <p>Maximising variance along a direction is <strong>mathematically identical</strong> to minimising the perpendicular reconstruction error (the distance from original points to the projected line). This is why PCA is provably optimal for linear compression.</p>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     SECTION 3 — PREREQUISITES
+══════════════════════════════════════════ -->
+<div class="section">
+  <div class="sec-label"><div class="sec-num">03</div> Prerequisites — The Math You Need</div>
+  <h2>Variance, Covariance & Eigenstuff</h2>
+
+  <div class="grid g3">
+    <div class="math-block">
+      <h3>Variance</h3>
+      <p>Measures how spread out a single feature is.</p>
+      <span class="formula">Var(X) = Σ(xᵢ − x̄)² / n</span>
+      <p>High variance → data is spread wide → more information.</p>
+    </div>
+    <div class="math-block">
+      <h3>Covariance</h3>
+      <p>Measures how two features move together.</p>
+      <span class="formula">Cov(X,Y) = Σ(xᵢ−x̄)(yᵢ−ȳ) / n</span>
+      <p>+ve → move together. −ve → move oppositely. 0 → independent.</p>
+    </div>
+    <div class="math-block">
+      <h3>Covariance Matrix</h3>
+      <p>Generalises to all pairs of features. For p features → p×p symmetric matrix.</p>
+      <span class="formula">C[i,j] = Cov(fᵢ, fⱼ)</span>
+      <p>Diagonal = variances. Off-diagonal = covariances.</p>
+    </div>
+  </div>
+
+  <div class="grid g2" style="margin-top:12px;">
+    <div class="math-block">
+      <h3>Eigenvectors</h3>
+      <p>For a matrix A, a vector <strong>v</strong> is an eigenvector if multiplying by A only <em>scales</em> it — never rotates it.</p>
+      <span class="formula">A · v = λ · v</span>
+      <p>In PCA: eigenvectors of the covariance matrix = <strong>directions of principal components</strong>.</p>
+      <p>There are always exactly <strong>p eigenvectors</strong> for a p×p matrix. They are all <strong>mutually orthogonal</strong> (perpendicular to each other).</p>
+    </div>
+    <div class="math-block">
+      <h3>Eigenvalues</h3>
+      <p>The scalar λ that goes with each eigenvector. It tells you <strong>how much variance exists along that eigenvector's direction</strong>.</p>
+      <span class="formula">λ₁ ≥ λ₂ ≥ ... ≥ λₚ</span>
+      <p>Sorting eigenvalues in descending order automatically ranks principal components from most to least important.</p>
+      <p><strong>Explained variance ratio</strong> of PCᵢ = λᵢ / Σλ</p>
+    </div>
+  </div>
+
+  <div class="callout coral">
+    <div class="callout-label">Why Eigenvectors?</div>
+    <p>We want the direction <strong>w</strong> that maximises variance of projected data: max Var(Xw) = max (wᵀ C w) subject to ‖w‖ = 1. Using Lagrange multipliers, the solution is: <strong>Cw = λw</strong> — the eigenvector equation. So the eigenvectors of the covariance matrix ARE the directions of maximum variance. This isn't an approximation — it's exact.</p>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     SECTION 4 — ALGORITHM STEP BY STEP
+══════════════════════════════════════════ -->
+<div class="section">
+  <div class="sec-label"><div class="sec-num">04</div> The Full Algorithm</div>
+  <h2>PCA step by step</h2>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-left"><div class="step-circle">1</div><div class="step-line"></div></div>
+      <div class="step-body">
+        <div class="step-title">Standardise the data</div>
+        <div class="step-desc">
+          Subtract mean and divide by standard deviation for every feature.<br>
+          <span class="formula">z = (x − μ) / σ&nbsp;&nbsp;&nbsp;<span class="comment">// mean=0, std=1 after scaling</span></span>
+          <strong>Why this matters:</strong> PCA maximises variance. If one feature ranges 0–10,000 and another 0–1, the first will dominate purely because of scale, not because it's actually more informative. Standardisation removes this bias.
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-left"><div class="step-circle">2</div><div class="step-line"></div></div>
+      <div class="step-body">
+        <div class="step-title">Compute the Covariance Matrix</div>
+        <div class="step-desc">
+          <span class="formula">C = (1/n) · Xᵀ · X&nbsp;&nbsp;&nbsp;<span class="comment">// X is mean-centred; shape: p×p</span></span>
+          For a dataset with p features, C is a p×p symmetric matrix. The diagonal tells you variance of each feature; off-diagonals reveal correlations between pairs. This matrix encodes all linear relationships in your data.
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-left"><div class="step-circle">3</div><div class="step-line"></div></div>
+      <div class="step-body">
+        <div class="step-title">Eigen Decomposition of Covariance Matrix</div>
+        <div class="step-desc">
+          Find all eigenvectors and eigenvalues of C.
+          <span class="formula">C · vᵢ = λᵢ · vᵢ</span>
+          You get p eigenvectors (each length p) and p eigenvalues. Each eigenvector points in a direction of some variance; the eigenvalue tells you how much variance lies along that direction. In practice sklearn uses <strong>SVD (Singular Value Decomposition)</strong> instead of explicit eigendecomposition — numerically more stable, same result.
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-left"><div class="step-circle">4</div><div class="step-line"></div></div>
+      <div class="step-body">
+        <div class="step-title">Sort eigenvectors by eigenvalue — descending</div>
+        <div class="step-desc">
+          The eigenvector with the largest eigenvalue becomes PC1, second largest becomes PC2, and so on.<br>
+          <span class="formula">λ₁ ≥ λ₂ ≥ λ₃ ≥ ... ≥ λₚ ≥ 0</span>
+          PC1 captures the most variance. PC2 is perpendicular to PC1 and captures the next most. All PCs are orthogonal (uncorrelated) by construction.
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-left"><div class="step-circle">5</div><div class="step-line"></div></div>
+      <div class="step-body">
+        <div class="step-title">Select top k components</div>
+        <div class="step-desc">
+          Choose k based on cumulative explained variance (typically ≥ 95%).
+          <span class="formula">Explained Variance Ratio of PCᵢ = λᵢ / (λ₁ + λ₂ + ... + λₚ)</span>
+          Form a <strong>projection matrix W</strong> by stacking the top k eigenvectors as columns: W is shape (p × k).
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-left"><div class="step-circle">6</div><div class="step-line"></div></div>
+      <div class="step-body">
+        <div class="step-title">Project the data onto the new subspace</div>
+        <div class="step-desc">
+          <span class="formula">X_reduced = X_scaled · W&nbsp;&nbsp;&nbsp;<span class="comment">// shape: (n × p) · (p × k) = (n × k)</span></span>
+          The result is your compressed dataset with n samples and only k features (the principal components). These k features are uncorrelated and ordered by importance.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     SECTION 5 — CHOOSING K
+══════════════════════════════════════════ -->
+<div class="section">
+  <div class="sec-label"><div class="sec-num">05</div> Choosing the Right k</div>
+  <h2>How many components to keep?</h2>
+
+  <div class="grid g3">
+    <div class="card">
+      <span class="card-icon">📊</span>
+      <h3>Scree Plot (Elbow Method)</h3>
+      <p>Plot eigenvalues (or % variance) per PC. Look for the "elbow" — where the line bends sharply. Keep all PCs before the elbow. After the elbow, extra PCs add diminishing information.</p>
+    </div>
+    <div class="card">
+      <span class="card-icon">📈</span>
+      <h3>Cumulative Variance Threshold</h3>
+      <p>Plot cumulative explained variance. Choose k where it first crosses <strong>95%</strong> (general tasks) or <strong>99%</strong> (sensitive tasks like medical imaging). In sklearn: <span class="badge">n_components=0.95</span></p>
+    </div>
+    <div class="card">
+      <span class="card-icon">👁️</span>
+      <h3>Visualisation Goal</h3>
+      <p>If you need to visualise, always use k = 2 (2D plot) or k = 3 (3D plot) regardless of variance percentage — that's the whole point.</p>
+    </div>
+  </div>
+
+  <!-- Scree plot diagram -->
+  <div class="diagram" style="margin-top:12px;">
+    <svg viewBox="0 0 680 220" xmlns="http://www.w3.org/2000/svg" font-family="DM Sans, sans-serif">
+      <text x="340" y="18" text-anchor="middle" font-size="12" fill="#a09e98" letter-spacing="1">SCREE PLOT — FINDING THE ELBOW</text>
+      <!-- axes -->
+      <line x1="60" y1="180" x2="60" y2="30" stroke="#333" stroke-width="1"/>
+      <line x1="60" y1="180" x2="620" y2="180" stroke="#333" stroke-width="1"/>
+      <text x="25" y="35" font-size="10" fill="#546e7a">% Var</text>
+      <text x="620" y="184" font-size="10" fill="#546e7a">PC #</text>
+      <!-- y labels -->
+      <text x="52" y="180" font-size="10" fill="#546e7a" text-anchor="end">0</text>
+      <text x="52" y="130" font-size="10" fill="#546e7a" text-anchor="end">25</text>
+      <text x="52" y="80" font-size="10" fill="#546e7a" text-anchor="end">50</text>
+      <text x="52" y="35" font-size="10" fill="#546e7a" text-anchor="end">75</text>
+      <!-- grid lines -->
+      <line x1="60" y1="130" x2="620" y2="130" stroke="#222" stroke-width="0.5" stroke-dasharray="4,4"/>
+      <line x1="60" y1="80" x2="620" y2="80" stroke="#222" stroke-width="0.5" stroke-dasharray="4,4"/>
+      <!-- bars -->
+      <rect x="80" y="45" width="55" height="135" fill="#c8a96e" opacity="0.8" rx="3"/>
+      <rect x="155" y="90" width="55" height="90" fill="#c8a96e" opacity="0.6" rx="3"/>
+      <rect x="230" y="128" width="55" height="52" fill="#5ecfb0" opacity="0.5" rx="3"/>
+      <rect x="305" y="148" width="55" height="32" fill="#5ecfb0" opacity="0.4" rx="3"/>
+      <rect x="380" y="160" width="55" height="20" fill="#5ecfb0" opacity="0.3" rx="3"/>
+      <rect x="455" y="166" width="55" height="14" fill="#5ecfb0" opacity="0.2" rx="3"/>
+      <rect x="530" y="170" width="55" height="10" fill="#5ecfb0" opacity="0.15" rx="3"/>
+      <!-- PC labels -->
+      <text x="107" y="196" text-anchor="middle" font-size="11" fill="#a09e98">PC1</text>
+      <text x="182" y="196" text-anchor="middle" font-size="11" fill="#a09e98">PC2</text>
+      <text x="257" y="196" text-anchor="middle" font-size="11" fill="#a09e98">PC3</text>
+      <text x="332" y="196" text-anchor="middle" font-size="11" fill="#a09e98">PC4</text>
+      <text x="407" y="196" text-anchor="middle" font-size="11" fill="#a09e98">PC5</text>
+      <text x="482" y="196" text-anchor="middle" font-size="11" fill="#a09e98">PC6</text>
+      <text x="557" y="196" text-anchor="middle" font-size="11" fill="#a09e98">PC7</text>
+      <!-- elbow arrow -->
+      <line x1="257" y1="128" x2="257" y2="50" stroke="#f08060" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <text x="270" y="46" font-size="12" fill="#f08060" font-weight="500">← elbow here</text>
+      <text x="270" y="60" font-size="11" fill="#f08060">keep PC1 + PC2</text>
+      <!-- % labels on bars -->
+      <text x="107" y="40" text-anchor="middle" font-size="11" fill="#c8a96e" font-weight="500">55%</text>
+      <text x="182" y="85" text-anchor="middle" font-size="11" fill="#c8a96e" font-weight="500">25%</text>
+    </svg>
+  </div>
+
+  <div class="callout coral">
+    <div class="callout-label">Common Mistake</div>
+    <p>Aiming for 100% cumulative variance means you kept <strong>all</strong> components — no dimensionality reduction happened at all. Always accept some small loss. Also, don't confuse explained variance (scikit returns ratio, not percentage — multiply by 100).</p>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     SECTION 6 — SKLEARN CODE
+══════════════════════════════════════════ -->
+<div class="section">
+  <div class="sec-label"><div class="sec-num">06</div> Implementation</div>
+  <h2>PCA in Python — complete code</h2>
+
+<div class="code"><span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+<span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> StandardScaler
+<span class="kw">from</span> sklearn.decomposition  <span class="kw">import</span> PCA
+<span class="kw">from</span> sklearn.pipeline       <span class="kw">import</span> Pipeline
+
+<span class="cm"># ── 1. SCALE (always before PCA) ──────────────────────────────────</span>
+scaler   = <span class="fn">StandardScaler</span>()
+X_train_s = scaler.<span class="fn">fit_transform</span>(X_train)   <span class="cm"># fit + transform train</span>
+X_test_s  = scaler.<span class="fn">transform</span>(X_test)        <span class="cm"># ONLY transform test</span>
+
+<span class="cm"># ── 2. FIT PCA ────────────────────────────────────────────────────</span>
+pca = <span class="fn">PCA</span>(n_components=<span class="nb">0.95</span>)               <span class="cm"># keep 95% variance</span>
+X_train_pca = pca.<span class="fn">fit_transform</span>(X_train_s)  <span class="cm"># fit on train only!</span>
+X_test_pca  = pca.<span class="fn">transform</span>(X_test_s)       <span class="cm"># no fit on test</span>
+
+<span class="cm"># ── 3. INSPECT ────────────────────────────────────────────────────</span>
+<span class="fn">print</span>(pca.n_components_)                    <span class="cm"># how many PCs selected</span>
+<span class="fn">print</span>(pca.explained_variance_ratio_)        <span class="cm"># variance per PC (array)</span>
+<span class="fn">print</span>(pca.explained_variance_ratio_.<span class="fn">sum</span>())  <span class="cm"># total variance kept</span>
+<span class="cm"># pca.components_  → shape (k, p): the eigenvectors (loadings)</span>
+<span class="cm"># pca.mean_        → mean of training data (used for centering)</span>
+
+<span class="cm"># ── 4. SCREE PLOT ─────────────────────────────────────────────────</span>
+plt.<span class="fn">figure</span>(figsize=(<span class="nb">8</span>, <span class="nb">4</span>))
+plt.<span class="fn">bar</span>(<span class="fn">range</span>(<span class="nb">1</span>, <span class="fn">len</span>(pca.explained_variance_ratio_)+<span class="nb">1</span>),
+        pca.explained_variance_ratio_, color=<span class="st">'steelblue'</span>, label=<span class="st">'Individual'</span>)
+plt.<span class="fn">plot</span>(<span class="fn">range</span>(<span class="nb">1</span>, <span class="fn">len</span>(pca.explained_variance_ratio_)+<span class="nb">1</span>),
+         np.<span class="fn">cumsum</span>(pca.explained_variance_ratio_),
+         <span class="st">'ro-'</span>, label=<span class="st">'Cumulative'</span>)
+plt.<span class="fn">axhline</span>(y=<span class="nb">0.95</span>, color=<span class="st">'gray'</span>, linestyle=<span class="st">'--'</span>, label=<span class="st">'95% threshold'</span>)
+plt.<span class="fn">xlabel</span>(<span class="st">'Principal Component'</span>); plt.<span class="fn">ylabel</span>(<span class="st">'Explained Variance Ratio'</span>)
+plt.<span class="fn">legend</span>(); plt.<span class="fn">tight_layout</span>(); plt.<span class="fn">show</span>()
+
+<span class="cm"># ── 5. 2D VISUALISATION ───────────────────────────────────────────</span>
+pca_2d = <span class="fn">PCA</span>(n_components=<span class="nb">2</span>)
+X_2d   = pca_2d.<span class="fn">fit_transform</span>(X_train_s)
+plt.<span class="fn">scatter</span>(X_2d[:, <span class="nb">0</span>], X_2d[:, <span class="nb">1</span>], c=y_train, cmap=<span class="st">'viridis'</span>, alpha=<span class="nb">0.7</span>)
+plt.<span class="fn">xlabel</span>(<span class="st">'PC1'</span>); plt.<span class="fn">ylabel</span>(<span class="st">'PC2'</span>)
+plt.<span class="fn">title</span>(<span class="st">'2D PCA projection'</span>); plt.<span class="fn">show</span>()
+
+<span class="cm"># ── 6. PIPELINE (best practice) ───────────────────────────────────</span>
+pipe = <span class="fn">Pipeline</span>([
+    (<span class="st">'scaler'</span>, <span class="fn">StandardScaler</span>()),
+    (<span class="st">'pca'</span>,    <span class="fn">PCA</span>(n_components=<span class="nb">0.95</span>)),
+    (<span class="st">'model'</span>,  <span class="fn">LogisticRegression</span>())
+])
+pipe.<span class="fn">fit</span>(X_train, y_train)
+pipe.<span class="fn">score</span>(X_test, y_test)</div>
+
+  <div class="callout teal" style="margin-top:14px;">
+    <div class="callout-label">Pipeline Best Practice</div>
+    <p>Always wrap StandardScaler + PCA + Model inside a <span class="badge">Pipeline</span>. It prevents data leakage automatically — the pipeline only calls <code>fit</code> on training data and <code>transform</code> on everything else. Use with <span class="badge">GridSearchCV</span> to tune n_components as a hyperparameter.</p>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     SECTION 7 — IMPORTANT ATTRIBUTES
+══════════════════════════════════════════ -->
+<div class="section">
+  <div class="sec-label"><div class="sec-num">07</div> Sklearn PCA Attributes</div>
+  <h2>What every attribute means</h2>
+  <div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>Attribute</th><th>Shape</th><th>What it contains</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge">pca.components_</span></td>
+        <td>(k, p)</td>
+        <td><strong>The eigenvectors</strong> — each row is one PC direction in original feature space. Also called "loadings". Tells you which original features contribute most to each PC.</td>
+      </tr>
+      <tr>
+        <td><span class="badge">pca.explained_variance_</span></td>
+        <td>(k,)</td>
+        <td>The <strong>eigenvalues</strong> — actual variance amounts along each PC. Raw numbers, not ratios.</td>
+      </tr>
+      <tr>
+        <td><span class="badge">pca.explained_variance_ratio_</span></td>
+        <td>(k,)</td>
+        <td>Eigenvalue of each PC divided by sum of all eigenvalues. Fraction of total variance. Sums to ≤1.</td>
+      </tr>
+      <tr>
+        <td><span class="badge">pca.singular_values_</span></td>
+        <td>(k,)</td>
+        <td>Singular values from SVD. Related to eigenvalues by: λᵢ = σᵢ² / (n−1).</td>
+      </tr>
+      <tr>
+        <td><span class="badge">pca.mean_</span></td>
+        <td>(p,)</td>
+        <td>Mean of training data. PCA centres the data before decomposition using this.</td>
+      </tr>
+      <tr>
+        <td><span class="badge">pca.n_components_</span></td>
+        <td>int</td>
+        <td>Number of components actually kept (useful when you pass a float for n_components).</td>
+      </tr>
+      <tr>
+        <td><span class="badge">pca.noise_variance_</span></td>
+        <td>float</td>
+        <td>Estimated noise covariance from discarded components (useful for probabilistic PCA).</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     SECTION 8 — GEOMETRIC INTERPRETATION
+══════════════════════════════════════════ -->
+<div class="section">
+  <div class="sec-label"><div class="sec-num">08</div> Geometric Intuition</div>
+  <h2>PCA as a rotation of axes</h2>
+
+  <p>Think of PCA as <strong>rotating the coordinate system</strong> to align with the natural axes of your data cloud — not distorting the data itself, just changing your perspective.</p>
+
+  <div class="grid g2">
+    <div class="callout purple">
+      <div class="callout-label">Before PCA</div>
+      <p>Data lives in the original x₁, x₂, ..., xₚ coordinate system. Features are correlated. The "natural shape" of the data cloud is diagonal relative to the axes.</p>
+    </div>
+    <div class="callout teal">
+      <div class="callout-label">After PCA</div>
+      <p>Data lives in the PC1, PC2, ..., PCₖ coordinate system. Components are orthogonal (zero correlation). The data cloud's natural elongation IS the axis. You can now drop the short axes safely.</p>
+    </div>
+  </div>
+
+  <div class="callout gold">
+    <div class="callout-label">Ellipsoid Interpretation</div>
+    <p>PCA fits a <strong>p-dimensional ellipsoid</strong> to the data. Each eigenvector is one axis of the ellipsoid. Each eigenvalue measures the length of that axis. If an axis is very short (tiny eigenvalue), the data barely varies in that direction — drop it. This is fundamentally what dimensionality reduction does.</p>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     SECTION 9 — PROS AND CONS
+══════════════════════════════════════════ -->
+<div class="section">
+  <div class="sec-label"><div class="sec-num">09</div> Strengths & Limitations</div>
+  <h2>When PCA shines and when it fails</h2>
+  <div class="procon">
+    <div><div class="pro-item"><span class="pro-icon">+</span>Removes multicollinearity — all output PCs are orthogonal (zero correlation)</div></div>
+    <div><div class="con-item"><span class="con-icon">−</span>Loss of interpretability — PCs are abstract combinations, not original features</div></div>
+    <div><div class="pro-item"><span class="pro-icon">+</span>Reduces overfitting by compressing noise into dropped components</div></div>
+    <div><div class="con-item"><span class="con-icon">−</span>Only linear — can't capture non-linear structures in data</div></div>
+    <div><div class="pro-item"><span class="pro-icon">+</span>Speeds up training — fewer dimensions = faster computation</div></div>
+    <div><div class="con-item"><span class="con-icon">−</span>Sensitive to scale — unscaled data gives wrong results</div></div>
+    <div><div class="pro-item"><span class="pro-icon">+</span>Enables 2D/3D visualisation of any high-dim data</div></div>
+    <div><div class="con-item"><span class="con-icon">−</span>Sensitive to outliers — outliers distort covariance and thus PCs</div></div>
+    <div><div class="pro-item"><span class="pro-icon">+</span>Deterministic and computationally efficient (via SVD)</div></div>
+    <div><div class="con-item"><span class="con-icon">−</span>Information loss is irreversible — you cannot perfectly recover originals</div></div>
+    <div><div class="pro-item"><span class="pro-icon">+</span>Always guaranteed to find the globally optimal linear projection</div></div>
+    <div><div class="con-item"><span class="con-icon">−</span>Doesn't use class labels (unsupervised) — may discard discriminative directions</div></div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     SECTION 10 — PCA vs ALTERNATIVES
+══════════════════════════════════════════ -->
+<div class="section">
+  <div class="sec-label"><div class="sec-num">10</div> PCA vs Alternatives</div>
+  <h2>Choosing the right technique</h2>
+
+  <div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>Technique</th><th>Type</th><th>Key difference from PCA</th><th>Use when</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>PCA</strong></td><td>Unsupervised, linear</td><td>—</td><td>General-purpose compression, visualisation, collinearity removal</td></tr>
+      <tr><td><strong>LDA</strong></td><td>Supervised, linear</td><td>Uses class labels; maximises class separation (not variance)</td><td>Classification tasks where you need discriminative features</td></tr>
+      <tr><td><strong>Kernel PCA</strong></td><td>Unsupervised, non-linear</td><td>Maps to higher dim via kernel, then applies PCA</td><td>Data with non-linear structure (circles, spirals, manifolds)</td></tr>
+      <tr><td><strong>t-SNE</strong></td><td>Unsupervised, non-linear</td><td>Preserves local neighbourhood structure; non-parametric</td><td>Visualisation only (2D/3D); results not reusable for new data</td></tr>
+      <tr><td><strong>UMAP</strong></td><td>Unsupervised, non-linear</td><td>Faster than t-SNE; better preserves global structure</td><td>Large datasets, visualisation + can transform new points</td></tr>
+      <tr><td><strong>Feature Selection</strong></td><td>Filter/Wrapper</td><td>Removes original features; keeps interpretability</td><td>Need to know which original features matter</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="compare-row" style="margin-top:1rem;">
+    <div class="compare-card">
+      <div class="compare-title" style="color: var(--accent);">PCA</div>
+      <ul>
+        <li>Ignores class labels entirely</li>
+        <li>Finds global variance directions</li>
+        <li>Can remove class-discriminative info</li>
+        <li>Always works, no class needed</li>
+        <li>Great pre-processing step</li>
+      </ul>
+    </div>
+    <div class="compare-card">
+      <div class="compare-title" style="color: var(--purple);">LDA (Linear Discriminant Analysis)</div>
+      <ul>
+        <li>Uses class labels (supervised)</li>
+        <li>Maximises between-class / within-class variance ratio</li>
+        <li>At most C−1 components (C = classes)</li>
+        <li>Better for classification problems</li>
+        <li>Assumes Gaussian class distributions</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     SECTION 11 — SVD CONNECTION
+══════════════════════════════════════════ -->
+<div class="section">
+  <div class="sec-label"><div class="sec-num">11</div> Under the Hood</div>
+  <h2>SVD — how sklearn actually computes PCA</h2>
+
+  <div class="callout purple">
+    <div class="callout-label">Why SVD instead of Eigendecomposition?</div>
+    <p>Computing the full covariance matrix C = XᵀX is expensive and numerically unstable for large p. SVD directly decomposes the data matrix X, is more stable, and handles cases where n &lt; p (more features than samples). Both give identical results.</p>
+  </div>
+
+  <div class="math-block">
+    <h3>SVD Decomposition</h3>
+    <p>Any matrix X (n×p) can be written as:</p>
+    <span class="formula">X = U · Σ · Vᵀ</span>
+    <p>where: <strong>U</strong> (n×n) = left singular vectors, <strong>Σ</strong> (n×p) = diagonal matrix of singular values, <strong>V</strong> (p×p) = right singular vectors (these ARE the eigenvectors of XᵀX, i.e. the principal components).</p>
+    <p>The principal components are the columns of V. The explained variance = σᵢ² / (n−1) for each singular value σᵢ. Sklearn sets <span class="badge">svd_solver='auto'</span> by default — chooses the best algorithm based on data size.</p>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     SECTION 12 — REAL-WORLD APPLICATIONS
+══════════════════════════════════════════ -->
+<div class="section">
+  <div class="sec-label"><div class="sec-num">12</div> Real-World Applications</div>
+  <h2>Where PCA is actually used</h2>
+
+  <div class="grid g2">
+    <div class="card">
+      <span class="card-icon">🖼️</span>
+      <h3>Eigenfaces (Face Recognition)</h3>
+      <p>Each face image (e.g., 100×100 pixels = 10,000 features) is compressed using PCA into ~50–100 components called "eigenfaces." New faces are classified by comparing their PC coordinates.</p>
+    </div>
+    <div class="card">
+      <span class="card-icon">🧬</span>
+      <h3>Genomics / DNA Analysis</h3>
+      <p>Datasets with 500,000+ genetic markers per person. PCA reduces to ~10 components that reveal population structure — literally the geographic origin of ancient human migration patterns.</p>
+    </div>
+    <div class="card">
+      <span class="card-icon">💹</span>
+      <h3>Finance / Risk Modelling</h3>
+      <p>Hundreds of correlated financial indicators reduced to a few PCs representing systematic risk factors (market risk, interest rate risk). Used in stress testing and portfolio optimisation.</p>
+    </div>
+    <div class="card">
+      <span class="card-icon">🔊</span>
+      <h3>Signal & Noise Separation</h3>
+      <p>In audio/sensor data, signal lives in top PCs (high variance). Noise is spread across many small PCs (low variance). Reconstructing from top k PCs removes noise automatically.</p>
+    </div>
+    <div class="card">
+      <span class="card-icon">🏥</span>
+      <h3>Medical Imaging</h3>
+      <p>MRI/CT scan voxel data has millions of features. PCA compresses to manageable representation for anomaly detection, tumour classification, or patient stratification.</p>
+    </div>
+    <div class="card">
+      <span class="card-icon">🛒</span>
+      <h3>Recommendation Systems</h3>
+      <p>User–item rating matrices are sparse and high-dimensional. PCA (or its cousin SVD) extracts latent factors representing genres, styles, etc. The basis of early Netflix Prize solutions.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     SECTION 13 — COMMON MISTAKES
+══════════════════════════════════════════ -->
+<div class="section">
+  <div class="sec-label"><div class="sec-num">13</div> Common Mistakes & Pitfalls</div>
+  <h2>What trips people up</h2>
+
+  <table>
+    <thead><tr><th>Mistake</th><th>Why it's wrong</th><th>Correct approach</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Fitting PCA on test data</strong></td>
+        <td>Leaks test distribution into the model — invalidates evaluation</td>
+        <td>Always <span class="badge">fit_transform</span> on train only, <span class="badge">transform</span> on test</td>
+      </tr>
+      <tr>
+        <td><strong>Skipping standardisation</strong></td>
+        <td>Features with large scales dominate variance calculations unfairly</td>
+        <td>Always apply <span class="badge">StandardScaler</span> before PCA</td>
+      </tr>
+      <tr>
+        <td><strong>Targeting 100% variance</strong></td>
+        <td>Means no reduction happened — all components kept</td>
+        <td>Target 95–99% based on task sensitivity</td>
+      </tr>
+      <tr>
+        <td><strong>Using PCA when non-linear structure exists</strong></td>
+        <td>PCA is blind to curves, spirals, manifolds</td>
+        <td>Use Kernel PCA, t-SNE, or UMAP for non-linear data</td>
+      </tr>
+      <tr>
+        <td><strong>Confusing PCA with feature selection</strong></td>
+        <td>PCA creates new abstract features; original ones are gone</td>
+        <td>If interpretability matters, use feature selection instead</td>
+      </tr>
+      <tr>
+        <td><strong>Ignoring outliers before PCA</strong></td>
+        <td>Outliers inflate covariance in wrong directions, misaligning PCs</td>
+        <td>Remove/cap outliers before applying PCA</td>
+      </tr>
+      <tr>
+        <td><strong>Applying PCA to categorical data</strong></td>
+        <td>PCA assumes continuous numerical input; covariance is meaningless for categories</td>
+        <td>One-hot encode first, or use MCA (Multiple Correspondence Analysis)</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     SECTION 14 — POINTS TO REMEMBER
+══════════════════════════════════════════ -->
+<div class="section">
+  <div class="sec-label"><div class="sec-num">14</div> Points to Remember</div>
+  <h2>Never forget these</h2>
+
+  <div class="remember">
+    <h3>★ Exam / Interview Essentials</h3>
+    <ul>
+      <li><strong>PCA is unsupervised</strong> — it has no idea about your labels. It only looks at X, never y.</li>
+      <li><strong>Principal components are orthogonal</strong> — they are always uncorrelated by construction. This is mathematically guaranteed.</li>
+      <li><strong>Number of PCs ≤ min(n, p)</strong> — you can never get more PCs than features or samples, whichever is smaller.</li>
+      <li><strong>PCA is reversible (approximately)</strong> — you can reconstruct originals using <span class="badge">pca.inverse_transform()</span>, but with information loss equal to the dropped variance.</li>
+      <li><strong>Scaling is mandatory</strong> — without it, PCA rewards units, not information. A feature in kg vs grams would behave completely differently.</li>
+      <li><strong>sklearn uses SVD internally</strong> — not explicit eigendecomposition. Same result, better numerical stability.</li>
+      <li><strong>n_components as float (0–1)</strong> — tells sklearn the minimum variance to preserve; it auto-selects the number of components needed.</li>
+      <li><strong>Eigenvalue = variance along that PC</strong> — directly interpretable. The sum of all eigenvalues = total variance in the scaled data.</li>
+      <li><strong>PCA ≠ Feature Selection</strong> — PCA discards original features entirely. Feature selection keeps them. Different goals, different methods.</li>
+      <li><strong>PC1 is the longest axis of the data ellipse</strong> — geometrically, the direction of maximum spread. PC2 is the second longest, perpendicular to PC1.</li>
+      <li><strong>Outliers ruin PCA</strong> — they pull the covariance matrix and shift the principal directions. Handle outliers before applying PCA.</li>
+      <li><strong>PCA is not always beneficial</strong> — if features are already uncorrelated and individually important, PCA may just add noise to the downstream model.</li>
+    </ul>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     SECTION 15 — CHEAT SHEET
+══════════════════════════════════════════ -->
+<div class="section">
+  <div class="sec-label"><div class="sec-num">15</div> Quick Reference</div>
+  <h2>The one-page cheat sheet</h2>
+
+  <div class="cheat">
+    <div class="cheat-header">PCA Quick Reference Card</div>
+    <div class="cheat-body">
+      <div class="grid g2" style="gap:1.5rem;">
+        <div>
+          <h3 style="color:var(--accent2); margin-bottom:10px; font-size:13px;">Key Formulas</h3>
+          <span class="formula">Standardise:  z = (x − μ) / σ</span>
+          <span class="formula">Covariance:   C = (1/n) Xᵀ X</span>
+          <span class="formula">Eigen:        C·v = λ·v</span>
+          <span class="formula">EVR:          λᵢ / Σλ</span>
+          <span class="formula">Project:      X_new = X·W_k</span>
+        </div>
+        <div>
+          <h3 style="color:var(--purple); margin-bottom:10px; font-size:13px;">sklearn Cheatsheet</h3>
+          <span class="formula">PCA(n_components=0.95)   <span class="comment"># auto k</span></span>
+          <span class="formula">PCA(n_components=2)      <span class="comment"># viz</span></span>
+          <span class="formula">pca.fit_transform(X_tr)  <span class="comment"># train</span></span>
+          <span class="formula">pca.transform(X_te)      <span class="comment"># test</span></span>
+          <span class="formula">pca.inverse_transform()  <span class="comment"># reconstruct</span></span>
+        </div>
+      </div>
+      <hr style="border:none; border-top:1px solid var(--border); margin:1.25rem 0;">
+      <div class="grid g3">
+        <div>
+          <h3 style="color:var(--teal); margin-bottom:8px; font-size:12px;">Use PCA when</h3>
+          <div class="chips">
+            <span class="chip">Many correlated features</span>
+            <span class="chip">Visualisation needed</span>
+            <span class="chip">Model trains slowly</span>
+            <span class="chip">Noise removal</span>
+            <span class="chip">Before clustering</span>
+          </div>
+        </div>
+        <div>
+          <h3 style="color:var(--coral); margin-bottom:8px; font-size:12px;">Don't use PCA when</h3>
+          <div class="chips">
+            <span class="chip">Interpretability needed</span>
+            <span class="chip">Non-linear data</span>
+            <span class="chip">Features already uncorrelated</span>
+            <span class="chip">Categorical features only</span>
+          </div>
+        </div>
+        <div>
+          <h3 style="color:var(--purple); margin-bottom:8px; font-size:12px;">Alternatives</h3>
+          <div class="chips">
+            <span class="chip">LDA → supervised</span>
+            <span class="chip">Kernel PCA → non-linear</span>
+            <span class="chip">t-SNE → viz only</span>
+            <span class="chip">UMAP → fast + viz</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  CampusX · 100 Days of Machine Learning · Day 47 · Principal Component Analysis<br>
+  <span style="font-size:10px; margin-top:4px; display:block;">Hand-crafted masterclass notes — every concept, every formula, zero fluff.</span>
+</div>
+
+</div>
+</body>
+</html>
